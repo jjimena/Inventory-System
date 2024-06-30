@@ -5,7 +5,9 @@
 @endsection
 
 @section('title-header')
-    All Products
+    <div class='mb-1'>
+        Products
+    </div>
 @endsection
 
 @section('content')
@@ -17,29 +19,27 @@
     @endif
     {{-- End Of Alert Success --}}
 
-    <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary mb-4">Create New Product</a>
-
+    @if (auth()->user()->role_id === App\Models\Role::ADMIN || auth()->user()->role_id === App\Models\Role::STAFF)
+        <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary mb-4">Create New Product</a>
+    @endif
     {{-- Filter --}}
-    <form action="{{ route('dashboard.products.index') }}" method="GET">
-        {{-- Categories --}}
-        <div class="col-3">
-            <label for="category">Choose Category</label>
-            <select class="form-select" id="category" name="category" onchange="this.form.submit()">
-                @foreach ($categories as $category)
-                    @if (empty(request()->input('category')))
-                        <option value="{{ $category['name'] }}" selected>
-                            {{ $category['name'] }}</option>
-                    @elseif (request()->input('category') == $category['name'])
-                        <option value="{{ $category['name'] }}" selected>
-                            {{ $category['name'] }}</option>
-                    @else
-                        <option value="{{ $category['name'] }}">
-                            {{ $category['name'] }}</option>
-                    @endif
-                @endforeach
-            </select>
+    <form action="{{ route('dashboard.products.index') }}" method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="category" class="form-label">Choose Category</label>
+                <select class="form-select" id="category" name="category" onchange="this.form.submit()">
+                    @foreach ($categories as $category)
+                        @if (empty(request()->input('category')))
+                            <option value="{{ $category['name'] }}" selected>{{ $category['name'] }}</option>
+                        @elseif (request()->input('category') == $category['name'])
+                            <option value="{{ $category['name'] }}" selected>{{ $category['name'] }}</option>
+                        @else
+                            <option value="{{ $category['name'] }}">{{ $category['name'] }}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
         </div>
-        {{-- End Of Categories --}}
     </form>
     {{-- End Of Filter --}}
 
@@ -49,46 +49,46 @@
             <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Id</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity In Stock</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Order Items</th>
-                    <th scope="col">Action</th>
+                    @if (auth()->user()->role_id === App\Models\Role::ADMIN)
+                        <th scope="col">Actions</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
                 @foreach ($products as $product)
                     <tr>
                         <th scope="row">{{ $loop->iteration }}</th>
-                        <td>{{ $product->id }}</td>
                         <td>{{ $product->name }}</td>
-                        <td>${{ number_format($product->price, 2) }}</td>
+                        <td class="price-column">₱ {{ number_format($product->price, 2) }}</td>
                         <td>{{ $product->quantity_in_stock }}</td>
-                        <td>{{ $product->category->name }}</td>
-                        <td>{{ $product->orderItems->count() }}</td>
-                        <td class="d-flex justify-items-center gap-2">
-                            <a href="{{ route('dashboard.products.show', $product->id) }}"
-                                class="btn btn-secondary">View</a>
-                            @can('product-edit-update-destroy', $product)
-                                <form action="{{ route('dashboard.products.destroy', $product->id) }}" method="POST">
+                        @if (auth()->user()->role_id === App\Models\Role::ADMIN)
+                            <td class="d-flex justify-items-center gap-2">
+                                <a href="{{ route('dashboard.products.show', $product->id) }}"
+                                    class="btn btn-secondary btn-sm">View</a>
+
+                                <a href="{{ route('dashboard.products.edit', $product->id) }}"
+                                    class="btn btn-primary btn-sm">Manage</a>
+
+                                <form action="{{ route('dashboard.products.destroy', $product->id) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     @method('DELETE')
-
-                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                 </form>
-                                <a href="{{ route('dashboard.products.edit', $product->id) }}" class="btn btn-primary">Edit</a>
-                            @endcan
-                        </td>
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>
         </table>
-
-        <div class="mt-3">
-            {{ $products->links() }}
-        </div>
     </div>
     {{-- End Of Table --}}
+
+
+    <div>
+        {{ $products->links() }}
+    </div>
 @endsection

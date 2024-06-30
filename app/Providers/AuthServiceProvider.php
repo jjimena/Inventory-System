@@ -26,6 +26,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        $this->registerPolicies();
+
+        // Define a gate to check if the user is an admin
+        Gate::define('edit-delete-products', function ($user) {
+            return $user->role_id === \App\Models\Role::ADMIN;
+        });
+        
         # Dashboard/OrderController
         Gate::define('order-edit-update-delete', function (User $user, Order $order): Response {
             if ($user->id !== $order->user_id) {

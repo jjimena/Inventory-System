@@ -10,12 +10,18 @@ class OrderItem extends Model
 {
     use HasFactory;
 
+    // Status constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_PAID = 'paid';
+
     protected $table = "order_items";
     protected $primaryKey = "id";
     public $timestamps = true;
     public $increments = true;
 
-    protected $fillable = ['quantity', 'unit_price', 'product_id', 'order_id'];
+    
+    protected $fillable = ['quantity', 'unit_price', 'product_id', 'customer_id', 'order_id', 'status', 'payment_method', 'reference_number' ];
 
     public function product(): BelongsTo
     {
@@ -26,4 +32,12 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Order::class, 'order_id', 'id');
     }
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+    // public function customer()
+    // {
+    //     return $this->belongsTo(Customer::class);
+    // }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -66,4 +67,11 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
+
+    protected $routeMiddleware = [
+        // other middleware entries...
+        'nocache' => \App\Http\Middleware\NoCacheMiddleware::class,
+    ];
+    
+    
 }

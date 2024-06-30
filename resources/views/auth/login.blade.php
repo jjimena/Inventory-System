@@ -9,7 +9,7 @@
         <form method="POST" action="{{ route('login.store') }}">
             @csrf
 
-            <div class="d-flex flex-column gap-3">
+            <div class="d-flex flex-column gap-2">
                 <h1 class="h3 mb-3 fw-normal">Please log in</h1>
 
                 <div class="form-floating">

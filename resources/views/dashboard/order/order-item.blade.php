@@ -5,7 +5,9 @@
 @endsection
 
 @section('title-header')
-    Order Items
+    <div class='mb-1'>
+        Order Items
+    </div>
 @endsection
 
 @section('content')
@@ -30,7 +32,7 @@
                         <th scope="row">{{ $loop->iteration }}</th>
                         <td>{{ $item->id }}</td>
                         <td>{{ $item->quantity }}</td>
-                        <td>${{ number_format($item->unit_price) }}</td>
+                        <td>₱ {{ number_format($item->unit_price) }}</td>
                         <td>{{ $item->product_id }}</td>
                         <td>{{ $order->id }}</td>
                     </tr>

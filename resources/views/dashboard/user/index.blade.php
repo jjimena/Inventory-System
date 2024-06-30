@@ -5,7 +5,9 @@
 @endsection
 
 @section('title-header')
-    All Users
+    <div class='mb-1'>
+        All Users
+    </div>
 @endsection
 
 @section('content')
@@ -28,6 +30,8 @@
                     <th scope="col">Id</th>
                     <th scope="col">Name</th>
                     <th scope="col">Email</th>
+                    <th scope="col">Phone Number</th>
+                    <th scope="col">Address</th>
                     <th scope="col">Role</th>
                     <th scope="col">Action</th>
                 </tr>
@@ -39,27 +43,32 @@
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td>{{ $user->role == App\Models\Role::ADMIN ? 'Admin' : 'User' }}</td>
-                        @if ($user->id === auth()->id())
-                            <td>
-                                N/A
-                            </td>
-                        @else
-                            <td class="d-flex justify-items-center gap-2">
-                                <a href="{{ route('dashboard.users.show', $user->id) }}" class="btn btn-secondary">View</a>
-                                @can('user-destroy', $user)
-                                    <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
+                        <td>{{ $user->phone_number }}</td>
+                        <td>{{ $user->address }}</td>
+                        </td>
+                        <td>{{ $user->role_id == \App\Models\Role::ADMIN ? 'Admin' : ($user->role_id == \App\Models\Role::HUB ? 'Hub' : 'Staff') }}
+                        </td>
+                        <td class="d-flex justify-items-center gap-2">
+                            <a href="{{ route('dashboard.users.show', $user->id) }}" class="btn btn-secondary">View</a>
+                            <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
 
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                @endcan
-                                @can('user-edit-update', $user)
-                                    <a href="{{ route('dashboard.users.edit', $user->id) }}" class="btn btn-primary">Edit</a>
-                                @endcan
-                            </td>
-                        @endif
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            <a href="{{ route('dashboard.users.edit', $user->id) }}" class="btn btn-primary">Update</a>
+                        </td>
+                        {{-- <td class="d-flex justify-items-center gap-2">
+                            <!-- Other actions buttons -->
+                            @if ($user->role_id == 3)
+                                <form action="{{ route('dashboard.customers.create', $user->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+
+                                    <button type="submit" class="btn btn-success">Add as Customer</button>
+                                </form>
+                            @endif
+                        </td> --}}
                     </tr>
                 @endforeach
             </tbody>

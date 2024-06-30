@@ -16,7 +16,7 @@ class Product extends Model
     public $timestamps = true;
     public $increments = true;
 
-    protected $fillable = ['name', 'description', 'price', 'quantity_in_stock', 'category_id', 'user_id'];
+    protected $fillable = ['name', 'description', 'price', 'quantity_in_stock', 'original_stocks', 'category_id', 'user_id'];
 
     public function category(): BelongsTo
     {
@@ -30,6 +30,10 @@ class Product extends Model
 
     public function orderItems(): HasMany
     {
-        return $this->hasMany(OrderItem::class, 'product_id', 'id');
+        return $this->hasMany(OrderItem::class, 'product_id', 'id', 'name');
+    }
+    public function hubPurchase(): HasMany
+    {
+        return $this->hasMany(Hub::class, 'product_id', 'id', 'name');
     }
 }

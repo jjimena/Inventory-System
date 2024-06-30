@@ -5,7 +5,9 @@
 @endsection
 
 @section('title-header')
-    Update Order
+    <div class='mb-1'>
+        Update Customer Details
+    </div>
 @endsection
 
 @section('content')

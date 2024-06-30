@@ -8,23 +8,23 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>
-        @yield('title')
-    </title>
+    <title>@yield('title')</title>
 
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
 <body>
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white"
-            href="{{ route('dashboard.index') }}">Inventory System</a>
+            href="{{ route('dashboard.index') }}">Phoenix Super LPG - Inventory System</a>
 
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
@@ -37,111 +37,186 @@
         </ul>
 
         <div id="navbarSearch" class="navbar-search w-100 collapse">
-            <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search"
+            <input class="form-control w-150 rounded-0 border-0" type="text" placeholder="Search"
                 aria-label="Search">
         </div>
     </header>
 
     <div class="container-fluid">
         <div class="row">
-            <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
-                <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu"
-                    aria-labelledby="sidebarMenuLabel">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="sidebarMenuLabel">Inventory System</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
-                            data-bs-target="#sidebarMenu" aria-label="Close"></button>
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <!-- Logo Section -->
+                    <div class="mb-3 text-left d-flex align-items-center">
+                        <a href="{{ route('dashboard.index') }}" style="text-decoration: none; color: black;">
+                            <img src="{{ asset('images/lpglogo.jpg') }}" alt="Company Logo"
+                                class="rounded-circle border"
+                                style="width: 39px; height: 39px; border: 2px solid #000;">
+                            <strong style="padding: 20px">{{ auth()->user()->name }}</strong>
+                        </a>
                     </div>
-                    <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
-                        <ul class="nav flex-column">
+
+                    <div class="border-bottom mb-3"> </div>
+
+                    <ul class="nav flex-column">
+                        @if (auth()->user()->role_id !== App\Models\Role::HUB)
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2"
-                                    href="{{ route('dashboard.index') }}">
+                                <a class="nav-link" id="nav-dashboard" href="{{ route('dashboard.index') }}">
                                     <i class="bi bi-house"></i>
                                     Dashboard
                                 </a>
                             </li>
+                        @endif
+
+                        @if (auth()->user()->role_id === App\Models\Role::ADMIN || auth()->user()->role_id === App\Models\Role::STAFF)
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2"
+                                <a class="nav-link" id="nav-categories"
                                     href="{{ route('dashboard.categories.index') }}">
                                     <i class="bi bi-tag"></i>
                                     Categories
                                 </a>
                             </li>
+                        @endif
+
+                        <li class="nav-item">
+                            <a class="nav-link" id="nav-products" href="{{ route('dashboard.products.index') }}">
+                                <i class="bi bi-bag"></i>
+                                Products
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" id="nav-purchase" href="{{ route('dashboard.order-items.create') }}">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Purchase Order
+                            </a>
+                        </li>
+
+                        @if (auth()->user()->role_id === App\Models\Role::ADMIN || auth()->user()->role_id === App\Models\Role::STAFF)
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2"
-                                    href="{{ route('dashboard.products.index') }}">
-                                    <i class="bi bi-bag"></i>
-                                    Products
+                                <a class="nav-link" id="nav-orders" href="{{ route('dashboard.orders.index') }}">
+                                    <i class="bi bi-cart"></i>
+                                    Customer
                                 </a>
                             </li>
-                        </ul>
+                        @endif
 
-                        @if (auth()->user()->role === App\Models\Role::ADMIN)
+
+                        <li class="nav-item">
+                            <a class="nav-link" id="nav-reports_form"
+                                href="{{ route('dashboard.order-items.index') }}">
+                                <i class="bi bi-bag"></i>
+                                Order Items
+                            </a>
+                        </li>
+
+                        @if (auth()->user()->role_id === App\Models\Role::ADMIN || auth()->user()->role_id === App\Models\Role::STAFF)
+                            <li class="nav-item">
+                                <a class="nav-link" id="nav-order-items"
+                                    href="{{ route('dashboard.reports.report_form') }}">
+                                    <i class="bi bi-bag"></i>
+                                    Genereate Reports
+                                </a>
+                            </li>
+                        @endif
+
+                        @if (auth()->user()->role_id === App\Models\Role::ADMIN)
                             <h6
-                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+                                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                                 <span>ADMIN</span>
                                 <i class="bi bi-wrench-adjustable"></i>
                             </h6>
-
-                            <ul class="nav flex-column">
+                            <ul class="nav flex-column mb-2">
                                 <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ route('dashboard.users.index') }}">
+                                    <a class="nav-link" id="nav-users" href="{{ route('dashboard.users.index') }}">
                                         <i class="bi bi-people"></i>
                                         Users
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ route('dashboard.orders.index') }}">
-                                        <i class="bi bi-cart"></i>
-                                        Orders
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center gap-2"
-                                        href="{{ route('dashboard.order-items.index') }}">
-                                        <i class="bi bi-bag"></i>
-                                        Order Items
                                     </a>
                                 </li>
                             </ul>
                         @endif
 
-                        <hr class="my-3">
-
-                        <ul class="nav flex-column mb-auto">
-                            <li class="nav-item">
-                                <form action="{{ route('logout') }}" method="POST">
-                                    @csrf
-
-                                    <button type="submit" class="nav-link d-flex align-items-center gap-2"
-                                        href="#">
-                                        <i class="bi bi-box-arrow-right"></i>
-                                        Sign out
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                        <li class="nav-item mt-3">
+                            <a class="nav-link" id="nav-profile" href="{{ route('dashboard.profiles.show') }}">
+                                <i class="bi bi-person-fill"></i>
+                                Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-link nav-link logout-link">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    Sign out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
-            </div>
+            </nav>
 
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        @yield('title-header')
-                    </h1>
+                    <h1 class="h2">@yield('title-header')</h1>
                 </div>
 
-                <div class="col-lg-8 mt-4">
+                <div class="col-lg-12 mt-4">
                     @yield('content')
                 </div>
             </main>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            // Function to add active class
+            function activateLink(link) {
+                navLinks.forEach(nav => nav.classList.remove('active'));
+                link.classList.add('active');
+            }
+
+            // Function to handle redirection
+            function redirect(link) {
+                const href = link.getAttribute('href');
+                if (href && !link.classList.contains('logout-link')) {
+                    window.location.href = href;
+                }
+            }
+
+            // Add event listeners for hover, click, and redirection
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    activateLink(this);
+                });
+
+                link.addEventListener('mouseleave', function() {
+                    this.classList.remove('active');
+                });
+
+                link.addEventListener('click', function(event) {
+                    if (!this.classList.contains('logout-link')) {
+                        event.preventDefault(); // Prevent default link behavior
+                        activateLink(this);
+                        redirect(this);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Enable the approve button if the order status is pending
+            if ($('#order-status').text() ===
+                'pending') { // Assuming #order-status is an element showing the order status
+                $('.approve-button').prop('disabled', false);
+            }
+        });
+    </script>
 </body>
 
 </html>

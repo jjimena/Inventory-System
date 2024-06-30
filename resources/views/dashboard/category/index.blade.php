@@ -5,7 +5,9 @@
 @endsection
 
 @section('title-header')
-    All Categories
+    <div class='mb-1'>
+        Product Categories
+    </div>
 @endsection
 
 @section('content')

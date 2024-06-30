@@ -15,15 +15,14 @@ return new class extends Migration
             $table->id();
             $table->integer('quantity')->nullable(false);
             $table->float('unit_price')->nullable(false);
+
+            $table->decimal('unit_price', 8, 2)->nullable()->default(0.00)->change();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete(); 
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('order_items');

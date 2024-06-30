@@ -16,9 +16,13 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->role != Role::ADMIN) {
-            abort(403);
-        }
+        // if (auth()->user()->role != Role::ADMIN) {
+        //     abort(403);
+        // }
+
+        // if (auth()->user()->role!= Role::ADMIN &&!in_array($request->route()->getName(), ['orders.orderItems', 'orders.index'])) {
+        //     abort(403);
+        // }
 
         return $next($request);
     }

@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 20)->unique()->nullable(false);
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->string('reference_number')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->dropColumn('reference_number');
+        });
     }
 };

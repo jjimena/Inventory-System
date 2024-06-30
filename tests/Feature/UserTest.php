@@ -1,6 +1,7 @@
 <?php
 
-namespace Tests\Feature\Dashboard;
+// namespace Tests\Feature\Dashboard;
+namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Models\User;
@@ -8,6 +9,8 @@ use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
 
 class UserTest extends TestCase
 {

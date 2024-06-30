@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     {
         # role user
         User::create([
-            'name' => 'test',
+            'name' => 'test1',
             'email' => 'test@gmail.com',
             'password' => 'password',
             'role' => 1,

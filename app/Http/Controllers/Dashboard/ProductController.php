@@ -12,32 +12,26 @@ use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): Response
     {
         $products = Product::with(['user', 'category', 'orderItems'])
-            ->whereHas('category', function ($query) {
-                $category = request()->input('category');
-                if ($category == 'All' || empty($category)) {
-                    return;
-                }
-
-                $query->where('name', request()->input('category', ''));
-            })
-            ->paginate(10)
-            ->appends(request()->all());
+        ->whereHas('category', function ($query) {
+            $category = request()->input('category');
+            if ($category == 'All' || empty($category)) {
+                return;
+            }
+            $query->where('name', request()->input('category', ''));
+        })
+        ->paginate(10)
+        ->appends(request()->all());        
+        
         $categories = Category::all()->toArray();
         $categories[] = ['name' => 'All'];
-
-        return response()
-            ->view('dashboard.product.index', compact('products', 'categories'));
+        
+    return response()
+    ->view('dashboard.product.index', compact('products', 'categories'));    
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         $categories = Category::all();
@@ -46,9 +40,6 @@ class ProductController extends Controller
             ->view('dashboard.product.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ProductStoreUpdateRequest $request): RedirectResponse
     {
         $product = new Product();
@@ -56,6 +47,7 @@ class ProductController extends Controller
         $product->description = $request->input('description');
         $product->price = $request->input('price');
         $product->quantity_in_stock = $request->input('quantity');
+        $product->original_stocks = $request->input('quantity'); // Set original_stocks to the initial quantity
         $product->category_id = $request->input('category');
         $product->user_id = auth()->id();
         $product->save();
@@ -65,39 +57,27 @@ class ProductController extends Controller
             ->with('success', 'Product successfully created.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Product $product): Response
     {
         return response()
             ->view('dashboard.product.show', compact('product'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Product $product): Response
     {
-        $this->authorize('product-edit-update-destroy', $product);
-
         $categories = Category::all();
 
         return response()
             ->view('dashboard.product.edit', compact('categories', 'product'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(ProductStoreUpdateRequest $request, Product $product): RedirectResponse
     {
-        $this->authorize('product-edit-update-destroy', $product);
-
         $product->name = $request->input('name');
         $product->description = $request->input('description');
         $product->price = $request->input('price');
         $product->quantity_in_stock = $request->input('quantity');
+        $product->original_stocks = $request->input('original_stocks'); // Update original_stocks if necessary
         $product->category_id = $request->input('category');
         $product->user_id = auth()->id();
         $product->save();
@@ -107,13 +87,8 @@ class ProductController extends Controller
             ->with('success', 'Product successfully updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Product $product): RedirectResponse
     {
-        $this->authorize('product-edit-update-destroy', $product);
-
         $product->delete();
 
         return redirect()

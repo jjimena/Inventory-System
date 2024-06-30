@@ -9,9 +9,6 @@ use Illuminate\Http\Response;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): Response
     {
         $categories = Category::with('products')->paginate(10);
@@ -20,18 +17,12 @@ class CategoryController extends Controller
             ->view('dashboard.category.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         return response()
             ->view('dashboard.category.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store()
     {
         request()->validate([
@@ -45,18 +36,12 @@ class CategoryController extends Controller
             ->with('success', 'Category successfully created.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Category $category): Response
     {
         return response()
             ->view('dashboard.category.edit', compact('category'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Category $category)
     {
         request()->validate([
@@ -71,9 +56,6 @@ class CategoryController extends Controller
             ->with('success', 'Category successfully updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category)
     {
         $category->delete();

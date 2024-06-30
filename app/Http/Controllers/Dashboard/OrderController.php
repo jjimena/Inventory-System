@@ -2,79 +2,99 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderStoreUpdateRequest;
 use App\Models\Order;
+use Illuminate\Http\Request;
+use App\Models\Product;
+use App\Models\Customer;
 use App\Models\OrderItem;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\OrderStoreUpdateRequest;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): Response
+    public function index(Request $request)
     {
-        $orders = Order::with(['user', 'orderItems'])->paginate(10);
+        // Paginate customers with their order items
+        $customers = Customer::with('orderItems')
+            ->paginate(10); // Adjust the number per page as per your requirement
 
-        return response()
-            ->view('dashboard.order.index', compact('orders'));
+        // Transform the paginated collection to compute total price and total quantity
+        $customers->getCollection()->transform(function ($customer) {
+            $totalPrice = $customer->orderItems->sum(function ($orderItem) {
+                return $orderItem->unit_price * $orderItem->quantity;
+            });
+            $totalQuantity = $customer->orderItems->sum('quantity');
+
+            return [
+                'id' => $customer->id,
+                'customer_name' => $customer->customer_name,
+                'customer_email' => $customer->customer_email,
+                'customer_phone_number' => $customer->customer_phone_number,
+                'address' => $customer->address,
+                'hub_name' => $customer->hub_name,
+                'total_price' => $totalPrice,
+                'total_quantity' => $totalQuantity,
+            ];
+        });
+
+        return view('dashboard.order.index', compact('customers'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
+        $products = Product::all();
+        $customers = Customer::all();
+        $orderItems = OrderItem::all();
+        $user = Auth::user(); // Retrieve the currently authenticated user
+
         return response()
-            ->view('dashboard.order.create');
+            ->view('dashboard.order.create', compact('customers', 'products', 'orderItems', 'user'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(OrderStoreUpdateRequest $request): RedirectResponse
     {
-        $order = new Order();
-        $order->date = $request->input('date');
-        $order->customer_name = $request->input('customer_name');
-        $order->customer_email = $request->input('customer_email');
-        $order->user_id = auth()->id();
-        $order->save();
-
         return redirect()
             ->route('dashboard.orders.index')
             ->with('success', 'Order successfully created.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Order $order): Response
+    public function customerOrders($customerId)
     {
-        return response()
-            ->view('dashboard.order.show', compact('order'));
+        $customer = Customer::findOrFail($customerId);
+
+        // Fetch all orders for the customer with their order items and products
+        $orders = Order::with(['orderItems.product'])
+            ->where('customer_id', $customerId)
+            ->get();
+
+        // Calculate the total price for each order
+        foreach ($orders as $order) {
+            $totalPrice = 0;
+            foreach ($order->orderItems as $item) {
+                $totalPrice += $item->unit_price * $item->quantity;
+            }
+            $order->total_price = $totalPrice;
+        }
+
+        return view('dashboard.orders.customer_orders', compact('customer', 'orders'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Order $order): Response
+    public function show($id)
     {
-        $this->authorize('order-edit-update-delete', $order);
-
-        return response()
-            ->view('dashboard.order.edit', compact('order'));
+        $order = Order::with('orderItems')->findOrFail($id);
+        return view('dashboard.order.show', compact('order'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    public function edit(Customer $customer)
+    {
+        return view('dashboard.order.edit', compact('customer'));
+    }
+
     public function update(OrderStoreUpdateRequest $request, Order $order): RedirectResponse
     {
-        $this->authorize('order-edit-update-delete', $order);
-
         $order->date = $request->input('date');
         $order->customer_name = $request->input('customer_name');
         $order->customer_email = $request->input('customer_email');
@@ -85,24 +105,15 @@ class OrderController extends Controller
             ->with('success', 'Order successfully updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Order $order)
+    public function destroy($id)
     {
-        $this->authorize('order-edit-update-delete', $order);
-
+        $order = Order::findOrFail($id);
         $order->delete();
-
-        return redirect()
-            ->route('dashboard.orders.index')
-            ->with('success', 'Order successfully deleted.');
+        return redirect()->route('dashboard.orders.index')->with('success', 'Order deleted successfully');
     }
 
     public function orderItems(Order $order): Response
     {
-        $this->authorize('order-edit-update-delete', $order);
-
         $orderItems = OrderItem::with('product')->where('order_id', $order->id)->paginate(10);
 
         return response()
