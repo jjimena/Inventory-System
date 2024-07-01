@@ -1,8 +1,5 @@
 # Inventory System: Laravel 10, Bootstrap 5.3, MySQL, Blade Template, Eloquent
 
-<img src="public/assets/products-preview.PNG" alt="Products Preview" />
-<img src="public/assets/orders-preview.PNG" alt="Products Preview" />
-
 ## Key Features
 
 -   Roles System
