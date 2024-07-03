@@ -3,7 +3,10 @@
     "builds": [
         {
             "src": "api/index.php",
-            "use": "@vercel/php"
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "public"
+            }
         },
         {
             "src": "public/**",
