@@ -1,5 +1,1 @@
 /vendor
-# .vercelignore
-node_modules
-large-file.zip
-*.log
