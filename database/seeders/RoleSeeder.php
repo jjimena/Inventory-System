@@ -18,8 +18,8 @@ class RoleSeeder extends Seeder
         //     ['name' => 'staff'], 
         //     ['name' => 'hub']
         // );
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'staff']);
-        Role::create(['name' => 'hub']);
+        Role::create(['name' => 'Admin']);
+        Role::create(['name' => 'Staff']);
+        Role::create(['name' => 'Hub']);
     }
 }

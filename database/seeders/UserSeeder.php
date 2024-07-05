@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        # role user
+        $role = Role::where('name', 'Admin')->first();
+
+        # role admin
         User::create([
             'name' => 'test1',
             'email' => 'test@gmail.com',
@@ -21,12 +21,19 @@ class UserSeeder extends Seeder
             'role' => 1,
         ]);
 
-        # role admin
+        # role staff
         User::create([
             'name' => 'test2',
             'email' => 'test2@gmail.com',
             'password' => 'password',
             'role' => 2,
+        ]);
+        # role hub
+        User::create([
+            'name' => 'test3',
+            'email' => 'test3@gmail.com',
+            'password' => 'password',
+            'role' => 3,
         ]);
     }
 }
