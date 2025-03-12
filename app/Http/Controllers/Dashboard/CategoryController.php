@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index(): Response
     {
-        $categories = Category::with('products')->paginate(10);
+        $categories = Category::orderBy('name', 'asc')->paginate(10); // Sorting by name in ascending order
 
         return response()
             ->view('dashboard.category.index', compact('categories'));

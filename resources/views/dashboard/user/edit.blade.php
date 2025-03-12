@@ -65,21 +65,6 @@
                 </div>
                 {{-- End Of Phone Number --}}
 
-                {{-- Hub Name --}}
-                <div class="form-floating">
-                    <input id="hub_name" type="text" class="form-control @error('hub_name') is-invalid @enderror"
-                        name="hub_name" autocomplete="hub_name" placeholder="Hub Name"
-                        value="{{ old('hub_name', $user->hub_name) }}">
-                    <label for="hub_name">Hub Name</label>
-
-                    @error('hub_name')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-                {{-- End Of Hub Name --}}
-
                 {{-- Address --}}
                 <div class="form-floating">
                     <input id="address" type="text" class="form-control @error('address') is-invalid @enderror"

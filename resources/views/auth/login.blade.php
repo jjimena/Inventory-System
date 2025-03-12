@@ -10,7 +10,7 @@
             @csrf
 
             <div class="d-flex flex-column gap-2">
-                <h1 class="h3 mb-3 fw-normal">Log in daw bi</h1>
+                <h1 class="h3 mb-3 fw-normal">Log in</h1>
 
                 <div class="form-floating">
                     <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"

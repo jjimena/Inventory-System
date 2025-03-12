@@ -6,130 +6,196 @@
 
 @section('title-header')
     <div class='mb-1'>
-        Purchase Order
+        New Order
     </div>
 @endsection
 
 @section('content')
-    <div class="col-md-6">
-        <a href="{{ route('dashboard.order-items.index') }}" class="btn btn-primary">Back</a>
-    </div>
-
     @if (session()->has('success'))
-        <div class="mt-3 alert alert-success" role="alert">
+        <div class="alert alert-success" role="alert">
             {{ session('success') }}
         </div>
     @endif
 
-    <div class="mt-2 d-flex justify-content-left">
-        <div class="col-md-6">
-            <form class="d-flex flex-column gap-2" method="POST" action="{{ route('dashboard.order-items.store') }}">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <h5 class="card-title mb-4 text-center">Purchase Item</h5>
+            <form method="POST" action="{{ route('dashboard.order-items.store') }}">
                 @csrf
-
-                {{-- Product ID --}}
-                <div class="form-floating">
-                    <select id="product_id" name="product_id" class="form-control @error('product_id') is-invalid @enderror"
-                        required autofocus onchange="updateProductDetails()">
-                        @php
-                            $displayedProducts = [];
-                        @endphp
-                        @foreach ($products->sortBy('created_at') as $product)
-                            @if (!array_key_exists($product->name, $displayedProducts))
+                <div class="row g-3">
+                    {{-- Product Selection --}}
+                    <div class="col-md-6">
+                        <label for="product_id" class="form-label">
+                            <i class="bi bi-box"></i> Product
+                        </label>
+                        <select id="product_id" name="product_id"
+                            class="form-select @error('product_id') is-invalid @enderror" onchange="updateProductDetails()"
+                            required>
+                            @foreach ($products->sortBy('name') as $product)
                                 @if ($product->quantity_in_stock > 0)
                                     <option value="{{ $product->id }}" data-price="{{ $product->price }}"
                                         data-stock="{{ $product->quantity_in_stock }}">
                                         {{ $product->name }}
                                     </option>
-                                    @php
-                                        // Track that this product name has been displayed
-                                        $displayedProducts[$product->name] = $product->quantity_in_stock;
-                                    @endphp
                                 @endif
-                            @endif
-                        @endforeach
-                    </select>
-                    <label for="product_id">Product Name</label>
-
-                    @error('product_id')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-                {{-- End Of Product ID --}}
-
-                {{-- Price --}}
-                <div class="form-floating">
-                    <input id="price" type="text" class="form-control" name="price" disabled placeholder="Price">
-                    <label for="price">Price</label>
-                </div>
-                {{-- End Of Price --}}
-
-                {{-- Quantity in Stock --}}
-                <div class="form-floating">
-                    <input id="quantity_in_stock" type="text" class="form-control" name="quantity_in_stock" disabled
-                        placeholder="Quantity in Stock">
-                    <label for="quantity_in_stock">Stock on Hand</label>
-                </div>
-                {{-- End Of Quantity in Stock --}}
-
-
-                {{-- Quantity --}}
-                <div class="form-floating">
-                    <input id="quantity" type="number" class="form-control @error('quantity') is-invalid @enderror"
-                        name="quantity" required autocomplete="quantity" autofocus placeholder="Quantity"
-                        value="{{ old('quantity') }}">
-                    <label for="quantity">Quantity</label>
-
-                    @error('quantity')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-                {{-- End Of Quantity --}}
-
-                @if (auth()->user()->role_id === App\Models\Role::ADMIN || auth()->user()->role_id === App\Models\Role::STAFF)
-                    <div class="form-floating">
-                        <select id="customer_id" name="customer_id"
-                            class="form-control @error('customer_id') is-invalid @enderror" required autofocus>
-                            @foreach ($customers as $customer)
-                                <option value="{{ $customer->id }}">{{ $customer->customer_name }}</option>
                             @endforeach
                         </select>
-                        <label for="customer_id">Distributor</label>
+                        @error('product_id')
+                            <span class="text-danger small">{{ $message }}</span>
+                        @enderror
+                        <input type="hidden" id="original_price" name="original_price">
+                    </div>
 
-                        @error('customer_id')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
+                    {{-- Quantity --}}
+                    <div class="col-md-6">
+                        <label for="quantity" class="form-label">
+                            <i class="bi bi-sort-numeric-up"></i> Quantity
+                        </label>
+                        <input type="number" id="quantity" name="quantity"
+                            class="form-control @error('quantity') is-invalid @enderror" placeholder="Enter quantity"
+                            value="{{ old('quantity') }}" required>
+                        @error('quantity')
+                            <span class="text-danger small">{{ $message }}</span>
                         @enderror
                     </div>
-                @else
-                    <input type="hidden" name="customer_id" value="{{ auth()->user()->id }}">
-                @endif
 
-                {{-- Button Submit --}}
-                <button class="btn btn-primary w-100 py-2" type="submit">Save</button>
-                {{-- End Of Button Submit --}}
+                    {{-- Price --}}
+                    <div class="col-md-6">
+                        <label for="price" class="form-label">
+                            <i class="bi bi-currency-dollar"></i> Price
+                        </label>
+                        <input type="text" id="price" name="price" class="form-control" disabled
+                            placeholder="Price">
+                    </div>
+
+                    {{-- Stock --}}
+                    <div class="col-md-6">
+                        <label for="quantity_in_stock" class="form-label">
+                            <i class="bi bi-boxes"></i> Stock on Hand
+                        </label>
+                        <input type="text" id="quantity_in_stock" name="quantity_in_stock" class="form-control" disabled
+                            placeholder="Available stock">
+                    </div>
+
+                    {{-- Customer Type --}}
+                    <div class="col-md-6">
+                        <label for="customer_type" class="form-label">
+                            <i class="bi bi-tags-fill"></i> Customer Type
+                        </label>
+                        <select id="customer_type" name="customer_type" class="form-select" required>
+                            <option value="">All Customer</option>
+                            @foreach ($customerTypes as $type)
+                                <option value="{{ $type }}">{{ $type }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Buyer --}}
+                    <div class="col-md-6">
+                        <label for="customer_id" class="form-label">
+                            <i class="bi bi-person-fill"></i> Buyer
+                        </label>
+                        <select id="customer_id" name="customer_id" class="form-select" required>
+                            <option value="">Select Buyer</option>
+                            @foreach ($customers as $customer)
+                                <option value="{{ $customer->id }}" data-type="{{ $customer->customer_type }}">
+                                    {{ $customer->customer_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Submit Button --}}
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-success btn-lg" type="submit">
+                            <i class="bi bi-save"></i> Save
+                        </button>
+                    </div>
             </form>
         </div>
     </div>
-
-    {{-- JavaScript to update price and stock --}}
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let customerTypeSelect = document.getElementById("customer_type");
+            let buyerSelect = document.getElementById("customer_id");
+
+            customerTypeSelect.addEventListener("change", function() {
+                let selectedType = this.value;
+
+                // Reset buyer dropdown to default option
+                buyerSelect.innerHTML = '<option value="">Select Buyer</option>';
+
+                // Filter buyers based on selected customer type
+                @json($customers).forEach(customer => {
+                    if (selectedType === "" || customer.customer_type === selectedType) {
+                        let option = document.createElement("option");
+                        option.value = customer.id;
+                        option.dataset.type = customer.customer_type;
+                        option.textContent = customer.customer_name;
+                        buyerSelect.appendChild(option);
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        function updateCustomerList() {
+            const customerType = document.getElementById('customer_type').value;
+            const customerSelect = document.getElementById('customer_id');
+            customerSelect.innerHTML = '<option value="">Select Customer</option>';
+
+            fetch(`{{ url('/dashboard/customers-by-type') }}/${customerType}`)
+                .then(response => response.json())
+                .then(customers => {
+                    customers.forEach(customer => {
+                        let option = document.createElement('option');
+                        option.value = customer.id;
+                        option.textContent = customer.customer_name;
+                        customerSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching customers:', error));
+        }
+
         function updateProductDetails() {
             const productSelect = document.getElementById('product_id');
             const selectedOption = productSelect.options[productSelect.selectedIndex];
-            const price = selectedOption.getAttribute('data-price');
+            const price = parseFloat(selectedOption.getAttribute('data-price'));
             const stock = selectedOption.getAttribute('data-stock');
 
-            document.getElementById('price').value = price;
+            document.getElementById('price').value = price.toFixed(2);
             document.getElementById('quantity_in_stock').value = stock;
+            document.getElementById('original_price').value = price;
+
+            updatePrice(); // Ensure price updates when changing products
         }
 
-        // Set the initial product details on page load
+        function updatePrice() {
+            const customerType = document.getElementById('customer_type').value;
+            const originalPrice = parseFloat(document.getElementById('original_price').value);
+
+            let finalPrice = originalPrice; // Default to original price
+
+            if (customerType === "Wholesale") {
+                if (originalPrice >= 1000) {
+                    finalPrice -= 60; // Deduct 60 if price is 1000 or more
+                } else if (originalPrice > 200 && originalPrice < 1000) {
+                    finalPrice -= 40; // Deduct 40 if price is between 200 and 1000
+                }
+                // If price is 200 or less, no deduction (default finalPrice = originalPrice)
+            }
+
+            document.getElementById('price').value = finalPrice.toFixed(2);
+        }
+
+        // Ensure the price updates instantly when customer type changes
+        document.getElementById('customer_type').addEventListener('change', updatePrice);
+
         document.addEventListener('DOMContentLoaded', function() {
+            updateProductDetails();
+        });
+
+        document.getElementById('product_id').addEventListener('change', function() {
             updateProductDetails();
         });
     </script>

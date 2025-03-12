@@ -13,12 +13,20 @@
     <!-- Fonts -->
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Include Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap CSS -->
+    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+
 </head>
 
 <body>
@@ -26,15 +34,11 @@
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white"
             href="{{ route('dashboard.index') }}">Phoenix Super LPG - Inventory System</a>
 
-        <ul class="navbar-nav flex-row d-md-none">
-            <li class="nav-item text-nowrap">
-                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas"
-                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <i class="bi bi-list"></i>
-                </button>
-            </li>
-        </ul>
+        <button class="navbar-toggler d-md-none px-3 text-white" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
 
         <div id="navbarSearch" class="navbar-search w-100 collapse">
             <input class="form-control w-150 rounded-0 border-0" type="text" placeholder="Search"
@@ -44,7 +48,17 @@
 
     <div class="container-fluid">
         <div class="row">
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <!-- Sidebar: Offcanvas on small screens, inline on larger screens -->
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar offcanvas-lg offcanvas-start"
+                tabindex="-1">
+                {{-- <div class="offcanvas-header d-md-none">
+                    <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div> --}}
+                <div class="offcanvas-header d-md-none">
+                    <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
                 <div class="position-sticky pt-3">
                     <!-- Logo Section -->
                     <div class="mb-3 text-left d-flex align-items-center">
@@ -62,7 +76,7 @@
                         @if (auth()->user()->role_id !== App\Models\Role::HUB)
                             <li class="nav-item">
                                 <a class="nav-link" id="nav-dashboard" href="{{ route('dashboard.index') }}">
-                                    <i class="bi bi-house"></i>
+                                    <i class="bi bi-house-door"></i>
                                     Dashboard
                                 </a>
                             </li>
@@ -72,8 +86,8 @@
                             <li class="nav-item">
                                 <a class="nav-link" id="nav-categories"
                                     href="{{ route('dashboard.categories.index') }}">
-                                    <i class="bi bi-tag"></i>
-                                    Categories
+                                    <i class="bi bi-tags"></i> <!-- Updated icon -->
+                                    Product Categories
                                 </a>
                             </li>
                         @endif
@@ -87,26 +101,25 @@
 
                         <li class="nav-item">
                             <a class="nav-link" id="nav-purchase" href="{{ route('dashboard.order-items.create') }}">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Purchase Order
+                                <i class="bi bi-cart-plus"></i> <!-- Updated icon -->
+                                New Order
                             </a>
                         </li>
 
                         @if (auth()->user()->role_id === App\Models\Role::ADMIN || auth()->user()->role_id === App\Models\Role::STAFF)
                             <li class="nav-item">
                                 <a class="nav-link" id="nav-orders" href="{{ route('dashboard.orders.index') }}">
-                                    <i class="bi bi-cart"></i>
+                                    <i class="bi bi-person-check"></i> <!-- Updated icon -->
                                     Customer
                                 </a>
                             </li>
                         @endif
 
-
                         <li class="nav-item">
                             <a class="nav-link" id="nav-reports_form"
                                 href="{{ route('dashboard.order-items.index') }}">
-                                <i class="bi bi-bag"></i>
-                                Order Items
+                                <i class="bi bi-clock-history"></i> <!-- Updated icon -->
+                                Purchase History
                             </a>
                         </li>
 
@@ -114,8 +127,8 @@
                             <li class="nav-item">
                                 <a class="nav-link" id="nav-order-items"
                                     href="{{ route('dashboard.reports.report_form') }}">
-                                    <i class="bi bi-bag"></i>
-                                    Genereate Reports
+                                    <i class="bi bi-graph-up"></i> <!-- Updated icon -->
+                                    Generate Reports
                                 </a>
                             </li>
                         @endif
@@ -129,7 +142,7 @@
                             <ul class="nav flex-column mb-2">
                                 <li class="nav-item">
                                     <a class="nav-link" id="nav-users" href="{{ route('dashboard.users.index') }}">
-                                        <i class="bi bi-people"></i>
+                                        <i class="bi bi-person-lines-fill"></i> <!-- Updated icon -->
                                         Users
                                     </a>
                                 </li>
@@ -152,6 +165,7 @@
                             </form>
                         </li>
                     </ul>
+
                 </div>
             </nav>
 
@@ -168,55 +182,9 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.nav-link');
-
-            // Function to add active class
-            function activateLink(link) {
-                navLinks.forEach(nav => nav.classList.remove('active'));
-                link.classList.add('active');
-            }
-
-            // Function to handle redirection
-            function redirect(link) {
-                const href = link.getAttribute('href');
-                if (href && !link.classList.contains('logout-link')) {
-                    window.location.href = href;
-                }
-            }
-
-            // Add event listeners for hover, click, and redirection
-            navLinks.forEach(link => {
-                link.addEventListener('mouseenter', function() {
-                    activateLink(this);
-                });
-
-                link.addEventListener('mouseleave', function() {
-                    this.classList.remove('active');
-                });
-
-                link.addEventListener('click', function(event) {
-                    if (!this.classList.contains('logout-link')) {
-                        event.preventDefault(); // Prevent default link behavior
-                        activateLink(this);
-                        redirect(this);
-                    }
-                });
-            });
-        });
-    </script>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Enable the approve button if the order status is pending
-            if ($('#order-status').text() ===
-                'pending') { // Assuming #order-status is an element showing the order status
-                $('.approve-button').prop('disabled', false);
-            }
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

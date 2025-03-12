@@ -86,20 +86,27 @@
                 </div>
                 {{-- End Of Address --}}
 
-                {{-- Hub Name --}}
+                {{-- Customer Type --}}
                 <div class="form-floating">
-                    <input id="hub_name" type="text" class="form-control @error('hub_name') is-invalid @enderror"
-                        name="hub_name" autocomplete="hub_name" placeholder="Hub Name"
-                        value="{{ old('hub_name', $customer->hub_name) }}">
-                    <label for="hub_name">Hub Name</label>
+                    <select id="customer_type" name="customer_type"
+                        class="form-select @error('customer_type') is-invalid @enderror" required>
+                        <option value="Walk-in"
+                            {{ old('customer_type', $customer->customer_type) === 'Walk-in' ? 'selected' : '' }}>Walk-in
+                        </option>
+                        <option value="Wholesale"
+                            {{ old('customer_type', $customer->customer_type) === 'Wholesale' ? 'selected' : '' }}>
+                            Wholesale</option>
+                    </select>
+                    <label for="customer_type">Customer Type</label>
 
-                    @error('hub_name')
+                    @error('customer_type')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
                 </div>
-                {{-- End Of Hub Name --}}
+                {{-- End Of Customer Type --}}
+
 
                 {{-- Button Submit --}}
                 <button class="btn btn-primary w-100 py-2" type="submit">Save</button>

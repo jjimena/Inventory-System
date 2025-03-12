@@ -79,7 +79,7 @@
                 {{-- End Of Quantity In Stock --}}
 
                 {{-- Original Stocks --}}
-                <div class="form-floating">
+                {{-- <div class="form-floating">
                     <input id="original_stocks" type="number"
                         class="form-control @error('original_stocks') is-invalid @enderror" name="original_stocks" required
                         autocomplete="original_stocks" placeholder="Original Stocks" />
@@ -90,7 +90,7 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
-                </div>
+                </div> --}}
                 {{-- End Of Original Stocks --}}
 
                 {{-- Categories --}}

@@ -16,7 +16,7 @@ class UserController extends Controller
 {
     public function index(): Response
     {
-        $users = User::with('products', 'orders')->paginate(10);
+        $users = User::with('products')->paginate(10);
 
         return response()
             ->view('dashboard.user.index', compact('users'));

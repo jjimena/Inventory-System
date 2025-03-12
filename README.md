@@ -23,7 +23,7 @@
 ## Cloning the repository
 
 ```bash
-git clone https://github.com/weiwei2694/laravel10-inventory-system.git
+git clone https://github.com/jjimena/Inventory-System
 cd laravel10-inventory-system
 ```
 

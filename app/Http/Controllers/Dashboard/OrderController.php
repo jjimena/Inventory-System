@@ -20,28 +20,63 @@ class OrderController extends Controller
         // Paginate customers with their order items
         $customers = Customer::with('orderItems')
             ->paginate(10); // Adjust the number per page as per your requirement
-
+    
         // Transform the paginated collection to compute total price and total quantity
         $customers->getCollection()->transform(function ($customer) {
-            $totalPrice = $customer->orderItems->sum(function ($orderItem) {
-                return $orderItem->unit_price * $orderItem->quantity;
-            });
-            $totalQuantity = $customer->orderItems->sum('quantity');
-
+            // Calculate total price excluding canceled orders
+            $totalPrice = $customer->orderItems
+                ->where('status', '!=', 'cancel') // Exclude canceled orders
+                ->sum(function ($orderItem) {
+                    return $orderItem->unit_price * $orderItem->quantity;
+                });
+    
+            // Calculate total quantity excluding canceled orders
+            $totalQuantity = $customer->orderItems
+                ->where('status', '!=', 'cancel') // Exclude canceled orders
+                ->sum('quantity');
+    
             return [
                 'id' => $customer->id,
                 'customer_name' => $customer->customer_name,
                 'customer_email' => $customer->customer_email,
                 'customer_phone_number' => $customer->customer_phone_number,
                 'address' => $customer->address,
-                'hub_name' => $customer->hub_name,
+                'customer_type' => $customer->customer_type,
                 'total_price' => $totalPrice,
                 'total_quantity' => $totalQuantity,
             ];
         });
-
+    
         return view('dashboard.order.index', compact('customers'));
     }
+    
+    // public function index(Request $request)
+    // {
+    //     // Paginate customers with their order items
+    //     $customers = Customer::with('orderItems')
+    //         ->paginate(10); // Adjust the number per page as per your requirement
+
+    //     // Transform the paginated collection to compute total price and total quantity
+    //     $customers->getCollection()->transform(function ($customer) {
+    //         $totalPrice = $customer->orderItems->sum(function ($orderItem) {
+    //             return $orderItem->unit_price * $orderItem->quantity;
+    //         });
+    //         $totalQuantity = $customer->orderItems->sum('quantity');
+
+    //         return [
+    //             'id' => $customer->id,
+    //             'customer_name' => $customer->customer_name,
+    //             'customer_email' => $customer->customer_email,
+    //             'customer_phone_number' => $customer->customer_phone_number,
+    //             'address' => $customer->address,
+    //             'hub_name' => $customer->hub_name,
+    //             'total_price' => $totalPrice,
+    //             'total_quantity' => $totalQuantity,
+    //         ];
+    //     });
+
+    //     return view('dashboard.order.index', compact('customers'));
+    // }
 
     public function create(): Response
     {

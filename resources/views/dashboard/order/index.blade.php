@@ -1,102 +1,87 @@
 @extends('layouts.app')
 
 @section('title')
-    Orders
+    Customers
 @endsection
 
 @section('title-header')
-    <div class='mb-1'>
-        Customer
+    <div class="mb-3">
+        <h1 class="h3 fw-bold">Customers</h1>
     </div>
 @endsection
 
 @section('content')
     <div class="d-flex justify-content-between mb-4">
         <div>
-            <a href="{{ route('dashboard.customers.create') }}" class="btn btn-primary">Create New Customer</a>
+            <a href="{{ route('dashboard.customers.create') }}" class="btn btn-primary btn-lg rounded-pill">
+                <i class="bi bi-person-plus-fill"></i> Create New Customer
+            </a>
         </div>
     </div>
 
     {{-- Alert Success --}}
     @if (session('success'))
-        <div class="alert alert-success mb-4" role="alert">
-            {{ session('success') }}
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+            <span class="fs-5">{{ session('success') }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    {{-- End Of Alert Success --}}
 
     {{-- Table --}}
-    <div class="table-responsive mt-4">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Customer Name</th>
-                    <th>Customer Email</th>
-                    <th>Phone Number</th>
-                    <th>Address</th>
-                    <th>Hub Name</th>
-                    <th>Total Products Ordered</th>
-                    <th>Total Purchased</th>
-                    <th>Actions</th> <!-- Add this header -->
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($customers as $customer)
-                    <tr>
-                        <th scope="row">{{ $loop->iteration }}</th>
-                        <td>{{ $customer['customer_name'] }}</td>
-                        <td>{{ $customer['customer_email'] }}</td>
-                        <td>{{ $customer['customer_phone_number'] }}</td>
-                        <td>{{ $customer['address'] }}</td>
-                        <td>{{ $customer['hub_name'] }}</td>
-                        <td class="text-center">{{ $customer['total_quantity'] }}</td>
-                        <td class="price-column">₱ {{ number_format($customer['total_price'], 2) }}</td>
-                        <td>
-                            <a href="{{ route('dashboard.customers.edit', $customer['id']) }}"
-                                class="btn btn-sm btn-primary">Manage</a>
-                            <form action="{{ route('dashboard.customers.destroy', $customer['id']) }}" method="POST"
-                                style="display: inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Are you sure you want to delete this customer?')">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="card shadow-lg border-0">
+        <div class="card-body">
+            <div class="table-responsive mt-4">
+                <table class="table table-striped table-hover align-middle border">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>#</th>
+                            <th>Customer Name</th>
+                            <th>Customer Email</th>
+                            <th>Phone Number</th>
+                            <th>Address</th>
+                            <th>Customer Type</th>
+                            <th class="text-end">Total Products Ordered</th>
+                            <th class="text-end">Total Purchased</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($customers as $customer)
+                            <tr class="text-center">
+                                <th scope="row">{{ $loop->iteration }}</th>
+                                <td>{{ $customer['customer_name'] }}</td>
+                                <td>{{ $customer['customer_email'] }}</td>
+                                <td>{{ $customer['customer_phone_number'] }}</td>
+                                <td>{{ $customer['address'] }}</td>
+                                <td>{{ $customer['customer_type'] }}</td>
+                                <td class="text-end">{{ $customer['total_quantity'] }}</td>
+                                <td class="text-end">₱ {{ number_format($customer['total_price'], 2) }}</td>
+                                <td class="d-flex justify-content-center gap-2">
+                                    <a href="{{ route('dashboard.customers.edit', $customer['id']) }}"
+                                        class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form action="{{ route('dashboard.customers.destroy', $customer['id']) }}"
+                                        method="POST" class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this customer?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="mt-3">
+
+    {{-- Pagination --}}
+    <div class="d-flex justify-content-center mt-4">
         {{ $customers->links() }}
     </div>
-
-    <script>
-        document.getElementById('generate-report').addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent the default form submission
-
-            var reportType = document.getElementById('report-type').value; // Get the selected report type
-
-            fetch('{{ route('dashboard.customers.create') }}', { // Assuming you have a named route for this action
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
-                    },
-                    body: JSON.stringify({
-                        type: reportType
-                    }) // Send the report type as JSON
-                })
-                .then(response => response.blob()) // Convert the response to a Blob object
-                .then(blob => {
-                    var url = window.URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = `customers_report_${reportType}.pdf`; // Set the download filename
-                    a.click(); // Trigger the download
-                })
-                .catch(error => console.error('Error:', error));
-        });
-    </script>
 @endsection

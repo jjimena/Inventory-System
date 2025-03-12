@@ -6,140 +6,117 @@
 
 @section('title-header')
     <div class='mb-1'>
-        Order Items
+        Purchase History
     </div>
 @endsection
 
 @section('content')
-    {{-- Alert Success --}}
+    {{-- Alerts --}}
     @if (session('success'))
-        <div class="alert alert-success mb-4 d-flex" role="alert">
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    {{-- End Of Alert Success --}}
 
-    {{-- Alert Danger --}}
     @if (session('error'))
-        <div class="alert alert-danger mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
             {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    {{-- End Of Alert Danger --}}
 
-    {{-- Table --}}
-    <div class="table-responsive mt-4">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'id', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">#</a>
-                    </th>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'customer_name', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Customer Name
-                        </a>
-                    </th>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'product_name', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Product Name
-                        </a>
-                    </th>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'quantity', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Quantity
-                        </a>
-                    </th>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'unit_price', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Unit Price
-                        </a>
-                    </th>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'payment_method', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Payment Method
-                        </a>
-                    </th>
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'status', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Status
-                        </a>
-                    </th>
-                    {{-- @if (auth()->user()->role_id === \App\Models\Role::ADMIN) --}}
-                    <th scope="col">
-                        <a style="text-decoration: none;"
-                            href="{{ route('dashboard.order-items.index', ['sort' => 'status', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
-                            Action
-                        </a>
-                    </th>
-                    {{-- @endif --}}
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($orderItems as $item)
-                    <tr>
-                        <th scope="row">{{ $loop->iteration }}</th>
-                        <td>{{ $item->customer->customer_name }}</td>
-                        <td>{{ $item->product->name }}</td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>₱ {{ number_format($item->unit_price) }}</td>
-                        <td>
-                            @if ($item->status === 'paid' || $item->status === 'approved')
-                                Paid via {{ strtoupper($item->payment_method) }}
-                            @elseif ($item->status === 'cod')
-                                Cash on Delivery
-                            @elseif ($item->status === 'pending')
-                                Pending Payment
-                            @endif
-                        </td>
+    {{-- Order Items Table --}}
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <h5 class="card-title text-center mb-4">Order Items</h5>
 
-                        <td>
-                            @if ($item->status === 'pending')
-                                <span class="badge bg-warning">Pending</span>
-                            @elseif ($item->status === 'paid' || $item->status === 'approved')
-                                <span class="badge bg-primary">approved</span>
-                            @elseif ($item->status === 'rejected')
-                                <span class="badge bg-danger">Rejected</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if (auth()->user()->role_id === \App\Models\Role::ADMIN)
-                                <a href="{{ route('dashboard.order-items.show', $item->id) }}"
-                                    class="btn btn-secondary">View</a>
-                                @if ($item->status === 'pending')
-                                    <a href="{{ route('dashboard.order-items.payment', $item->id) }}"
-                                        class="btn btn-primary">Pay Order</a>
-                                    <form action="{{ route('dashboard.order-items.reject', $item->id) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger">Reject Order</button>
-                                    </form>
-                                @endif
-                            @endif
-                            @if (auth()->user()->role_id === \App\Models\Role::HUB)
-                                @if ($item->status === 'pending')
-                                    <a href="{{ route('dashboard.order-items.payment', $item->id) }}"
-                                        class="btn btn-primary">Pay Order</a>
-                                @endif
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'id', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    # </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'customer_name', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-person-fill"></i> Customer Name
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'product_name', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-box"></i> Product Name
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'status', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-info-circle"></i> Customer Type
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'quantity', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-sort-numeric-up"></i> Quantity
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'unit_price', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-currency-dollar"></i> Unit Price
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'reference_number', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-file-earmark-text"></i> Reference Number
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a
+                                    href="{{ route('dashboard.order-items.index', ['sort' => 'payment_method', 'order' => $sortOrder === 'asc' ? 'desc' : 'asc']) }}">
+                                    <i class="bi bi-wallet2"></i> Payment Method
+                                </a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($orderItems as $item)
+                            <tr>
+                                <th scope="row">
+                                    {{ ($orderItems->currentPage() - 1) * $orderItems->perPage() + $loop->iteration }}</th>
+                                <td>{{ $item->customer->customer_name }}</td>
+                                <td>{{ $item->product->name }}</td>
+                                <td>{{ $item->customer->customer_type }}</td>
+                                <td>{{ $item->quantity }}</td>
+                                <td>₱ {{ number_format($item->unit_price, 2) }}</td>
+                                <td>{{ $item->reference_number ?? 'N/A' }}</td>
+                                <td>
+                                    @if ($item->status === 'paid' || $item->status === 'approved')
+                                        Paid via {{ strtoupper($item->payment_method) }}
+                                    @elseif ($item->status === 'cod')
+                                        Cash
+                                    @elseif ($item->status === 'cancel')
+                                        Rejected Item
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
     </div>
-    {{-- End Of Table --}}
 
     {{-- Pagination --}}
-    <div class="justify-content-right mt-3">
+    <div class="d-flex justify-content-end mt-3">
         {{ $orderItems->appends(['sort' => $sortField, 'order' => $sortOrder])->links() }}
     </div>
-    {{-- End Of Pagination --}}
 @endsection

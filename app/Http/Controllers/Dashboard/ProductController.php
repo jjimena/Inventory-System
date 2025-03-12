@@ -14,22 +14,29 @@ class ProductController extends Controller
 {
     public function index(): Response
     {
+        // Fetch products with relationships and optional category filtering
         $products = Product::with(['user', 'category', 'orderItems'])
-        ->whereHas('category', function ($query) {
-            $category = request()->input('category');
-            if ($category == 'All' || empty($category)) {
-                return;
-            }
-            $query->where('name', request()->input('category', ''));
-        })
-        ->paginate(10)
-        ->appends(request()->all());        
-        
+            ->whereHas('category', function ($query) {
+                $category = request()->input('category');
+                if ($category == 'All' || empty($category)) {
+                    return;
+                }
+                $query->where('name', request()->input('category', ''));
+            })
+            ->orderBy('name', 'asc')  // Order products by name in ascending order
+            ->paginate(10)
+            ->appends(request()->all());
+
+        // Fetch all categories and add 'All' as an option
         $categories = Category::all()->toArray();
         $categories[] = ['name' => 'All'];
-        
-    return response()
-    ->view('dashboard.product.index', compact('products', 'categories'));    
+
+        // Fetch the first product (or null if none exists)
+        $firstProduct = Product::first();
+
+        // Pass the data to the view
+        return response()
+            ->view('dashboard.product.index', compact('products', 'categories', 'firstProduct'));
     }
 
     public function create(): Response
@@ -42,6 +49,22 @@ class ProductController extends Controller
 
     public function store(ProductStoreUpdateRequest $request): RedirectResponse
     {
+        // Check if a product with the same name and price already exists
+        $existingProduct = Product::where('name', $request->input('name'))
+            ->where('price', $request->input('price'))
+            ->first();
+
+        if ($existingProduct) {
+            // If it exists, update the quantity
+            $existingProduct->quantity_in_stock += $request->input('quantity');
+            $existingProduct->save();
+
+            return redirect()
+                ->route('dashboard.products.index')
+                ->with('success', 'Product quantity successfully updated.');
+        }
+
+        // Otherwise, create a new product
         $product = new Product();
         $product->name = $request->input('name');
         $product->description = $request->input('description');
@@ -56,11 +79,29 @@ class ProductController extends Controller
             ->route('dashboard.products.index')
             ->with('success', 'Product successfully created.');
     }
-
-    public function show(Product $product): Response
+    public function search(Request $request)
     {
-        return response()
-            ->view('dashboard.product.show', compact('product'));
+        $query = $request->input('query');
+
+        // Ensure the query is not empty
+        if (!$query) {
+            return response()->json([], 400);
+        }
+
+        // Fetch customers whose names match the query
+        $customers = Customer::where('customer_name', 'like', "%$query%")
+            ->orderBy('customer_name')
+            ->get(['id', 'customer_name']);
+
+        return response()->json($customers);
+    }
+
+
+    public function show(Product $product)
+    {
+        $products = Product::orderBy('created_at', 'desc')->paginate(10)->appends(request()->all());  // This will keep the query params (like page) in the URL; // Fetch all products ordered by latest
+
+        return view('dashboard.product.show', compact('products'));
     }
 
     public function edit(Product $product): Response
@@ -73,6 +114,26 @@ class ProductController extends Controller
 
     public function update(ProductStoreUpdateRequest $request, Product $product): RedirectResponse
     {
+        // Check if there is another product with the same name and price
+        $existingProduct = Product::where('name', $request->input('name'))
+            ->where('price', $request->input('price'))
+            ->where('id', '!=', $product->id) // Exclude the current product being updated
+            ->first();
+
+        if ($existingProduct) {
+            // Merge quantities if a matching product exists
+            $existingProduct->quantity_in_stock += $request->input('quantity');
+            $existingProduct->save();
+
+            // Delete the current product as it is merged
+            $product->delete();
+
+            return redirect()
+                ->route('dashboard.products.index')
+                ->with('success', 'Product successfully merged with an existing product.');
+        }
+
+        // Update the product if no merging is required
         $product->name = $request->input('name');
         $product->description = $request->input('description');
         $product->price = $request->input('price');

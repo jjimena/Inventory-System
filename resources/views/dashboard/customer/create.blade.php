@@ -80,21 +80,6 @@
                 </div>
                 {{-- End Of Phone Number --}}
 
-                {{-- Hub Name --}}
-                <div class="form-floating">
-                    <input id="hub_name" type="text" class="form-control @error('hub_name') is-invalid @enderror"
-                        name="hub_name" autocomplete="hub_name" autofocus placeholder="Hub Name"
-                        value="{{ old('hub_name') }}">
-                    <label for="hub_name">Hub Name</label>
-
-                    @error('hub_name')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-                {{-- End Of Hub Name --}}
-
                 {{-- Address --}}
                 <div class="form-floating">
                     <textarea id="address" class="form-control @error('address') is-invalid @enderror" name="address" required
@@ -108,6 +93,28 @@
                     @enderror
                 </div>
                 {{-- End Of Address --}}
+
+                {{-- Customer Type --}}
+                <div class="form-floating">
+                    <select id="customer_type" name="customer_type"
+                        class="form-select @error('customer_type') is-invalid @enderror" required>
+                        <option value="Walk-in" {{ old('customer_type') === 'Walk-in' ? 'selected' : '' }}>Walk-in</option>
+                        <option value="Wholesale" {{ old('customer_type') === 'Wholesale' ? 'selected' : '' }}>Wholesale
+                        </option>
+                    </select>
+                    <label for="customer_type">Customer Type <span class="text-danger">*</span></label>
+
+                    @error('customer_type')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+                {{-- End Of Customer Type --}}
+
+
+
+
 
                 {{-- Hidden Date --}}
                 <input type="hidden" name="date" value="{{ old('date', now()->toDateString()) }}">
